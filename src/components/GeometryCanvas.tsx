@@ -1,2 +1,4 @@
-import GeometryCanvas from './GeometryCanvas/index';
-export default GeometryCanvas; 
+
+import { GeometryCanvas } from './GeometryCanvas/index';
+export { GeometryCanvas };
+export default GeometryCanvas;
