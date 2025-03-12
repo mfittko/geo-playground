@@ -34,8 +34,8 @@ const renderCircle = (circle: Circle, isSelected: boolean, activeMode: string) =
         top: circle.position.y - circle.radius,
         width: circle.radius * 2,
         height: circle.radius * 2,
-        backgroundColor: circle.fillColor,
-        borderColor: circle.strokeColor,
+        backgroundColor: circle.fill,
+        borderColor: circle.stroke,
         transform: `rotate(${circle.rotation}rad)`,
         cursor: activeMode === 'select' ? 'pointer' : 'default',
         zIndex: isSelected ? 10 : 1
@@ -56,8 +56,8 @@ const renderRectangle = (rect: Rectangle, isSelected: boolean, activeMode: strin
         top: rect.position.y,
         width: rect.width,
         height: rect.height,
-        backgroundColor: rect.fillColor,
-        borderColor: rect.strokeColor,
+        backgroundColor: rect.fill,
+        borderColor: rect.stroke,
         transform: `rotate(${rect.rotation}rad)`,
         transformOrigin: 'center',
         cursor: activeMode === 'select' ? 'pointer' : 'default',
@@ -105,8 +105,8 @@ const renderTriangle = (tri: Triangle, isSelected: boolean, activeMode: string) 
       >
         <path
           d={pathData}
-          fill={tri.fillColor}
-          stroke={tri.strokeColor}
+          fill={tri.fill}
+          stroke={tri.stroke}
           strokeWidth="1"
           transform={`rotate(${tri.rotation}, ${width/2}, ${height/2})`}
           style={{
@@ -172,7 +172,7 @@ const renderLine = (line: Line, isSelected: boolean, activeMode: string) => {
           y1={startY}
           x2={endX}
           y2={endY}
-          stroke={line.strokeColor}
+          stroke={line.stroke}
           strokeWidth="1"
           strokeLinecap="round"
           style={{
@@ -181,8 +181,8 @@ const renderLine = (line: Line, isSelected: boolean, activeMode: string) => {
         />
         
         {/* Add small circles at endpoints to make them more visible */}
-        <circle cx={startX} cy={startY} r="4" fill={line.strokeColor} />
-        <circle cx={endX} cy={endY} r="4" fill={line.strokeColor} />
+        <circle cx={startX} cy={startY} r="4" fill={line.stroke} />
+        <circle cx={endX} cy={endY} r="4" fill={line.stroke} />
       </svg>
     </div>
   );

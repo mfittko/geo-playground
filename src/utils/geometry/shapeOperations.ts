@@ -30,15 +30,17 @@ const findShapeById = (shapes: AnyShape[], shapeId: string | null): AnyShape | u
  * Selects a shape by ID and deselects all others
  * @param shapes Array of shapes
  * @param shapeId ID of the shape to select, or null to deselect all
- * @returns New array with the same shapes (selection is now handled by selectedShapeId state)
+ * @returns New array with updated selection states
  */
 export const selectShape = (shapes: AnyShape[], shapeId: string | null): AnyShape[] => {
   if (!shapes || !Array.isArray(shapes) || shapes.length === 0) {
     return [];
   }
   
-  // We no longer modify the shapes, as selection is handled by the selectedShapeId state
-  return [...shapes];
+  return shapes.map(shape => ({
+    ...shape,
+    selected: shape.id === shapeId
+  }));
 };
 
 /**

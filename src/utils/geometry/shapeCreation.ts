@@ -38,9 +38,10 @@ export const createCircle = (startPoint: Point, endPoint: Point, id: string): Ci
     position: { ...startPoint },
     radius,
     rotation: 0,
-    fillColor: getNextShapeColor(),
-    strokeColor: DEFAULT_STROKE,
-    opacity: 1
+    selected: true,
+    fill: getNextShapeColor(),
+    stroke: DEFAULT_STROKE,
+    strokeWidth: DEFAULT_STROKE_WIDTH
   };
 };
 
@@ -71,9 +72,10 @@ export const createRectangle = (startPoint: Point, endPoint: Point, id: string):
     width,
     height,
     rotation: 0,
-    fillColor: getNextShapeColor(),
-    strokeColor: DEFAULT_STROKE,
-    opacity: 1
+    selected: true,
+    fill: getNextShapeColor(),
+    stroke: DEFAULT_STROKE,
+    strokeWidth: DEFAULT_STROKE_WIDTH
   };
 };
 
@@ -132,9 +134,10 @@ export const createTriangle = (startPoint: Point, endPoint: Point, id: string): 
     position,
     points: [p1, p2, p3],
     rotation: 0,
-    fillColor: getNextShapeColor(),
-    strokeColor: DEFAULT_STROKE,
-    opacity: 1
+    selected: true,
+    fill: getNextShapeColor(),
+    stroke: DEFAULT_STROKE,
+    strokeWidth: DEFAULT_STROKE_WIDTH
   };
 };
 
@@ -167,9 +170,10 @@ export const createLine = (startPoint: Point, endPoint: Point, id: string): Line
     endPoint: { ...endPoint },
     length,
     rotation: 0,
-    fillColor: 'transparent', // Lines don't have fill
-    strokeColor: getNextShapeColor(), // Use a distinct color for lines
-    opacity: 1
+    selected: true,
+    fill: 'transparent', // Lines don't have fill
+    stroke: getNextShapeColor(), // Use a distinct color for lines
+    strokeWidth: 2
   };
 };
 

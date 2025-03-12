@@ -99,24 +99,7 @@
     "lineExplanation": "Berechnet den direkten Abstand zwischen zwei Punkten",
     "select": "Formen auswählen & bewegen",
     "rotate": "Form drehen",
-    "delete": "Ausgewählte löschen",
-    "plot": "Funktionen plotten",
-    "plotDescription": "Erstellen und visualisieren Sie mathematische Funktionen",
-    "calibrate": "Bildschirm kalibrieren",
-    "calibrateDescription": "Bildschirmkalibrierung für genaue physische Messungen anpassen",
-    "coarseAdjustment": "Grobe Anpassung: Größere Änderungen an der Kalibrierung vornehmen",
-    "fineAdjustment": "Feine Anpassung: Kleinere Änderungen an der Kalibrierung vornehmen",
-    "zoomIn": "Vergrößern für mehr Details",
-    "zoomOut": "Verkleinern für Gesamtübersicht",
-    "move": "Form bewegen",
-    "draw": "Form zeichnen",
-    "clear": "Alle Formen löschen",
-    "moveDescription": "Ausgewählte Form bewegen",
-    "rotateDescription": "Ausgewählte Form drehen",
-    "clearDescription": "Alle Formen von der Leinwand entfernen",
-    "examplesButtonTooltip": "Beispielfunktionen durchsuchen",
-    "scaleFactorTooltip": "Skalierungsfaktor anpassen",
-    "colorPickerTooltip": "Funktionsfarbe ändern"
+    "delete": "Ausgewählte löschen"
   },
   "holdShiftToSnap15Degrees": "Halte Shift gedrückt, um beim Drehen in 15°-Schritten einzurasten",
   "shareCanvas": "Leinwand-URL teilen",
@@ -127,107 +110,5 @@
   "parametricPointInfo": "Parametrische Funktion (t-Wert nicht verfügbar)",
   "polarPointInfo": "Polarfunktion (θ-Wert nicht verfügbar)",
   "pointInfoTitle": "Punktinformation",
-  "clickOnCurveInstruction": "Klicken Sie auf die Kurve, um einen Punkt auszuwählen und seine Informationen anzuzeigen.",
-  "infoPanel": "Informationsfeld",
-  "shapeInfo": "Forminfo",
-  "pointInfo": "Punktinfo",
-  "categories": {
-    "basic": "Grundfunktionen",
-    "trigonometric": "Trigonometrische Funktionen",
-    "exponential": "Exponential- & Logarithmusfunktionen",
-    "parametric": "Parametrische Kurven",
-    "special": "Spezielle Funktionen",
-    "polynomial": "Polynome"
-  },
-  "naturalLanguageTitle": "Funktion beschreiben",
-  "naturalLanguage": "KI-Funktionsgenerator",
-  "naturalLanguagePlaceholder": "Beschreiben Sie die Funktion in natürlicher Sprache, z.B. 'eine Parabel, die nach oben geöffnet ist' oder 'Sinuswelle mit Periode 2π'",
-  "naturalLanguageDescription": "Verwenden Sie natürliche Sprache oder Pseudocode, um die gewünschte Funktion zu beschreiben. OpenAI wird diese in einen mathematischen Ausdruck umwandeln.",
-  "naturalLanguageGenerate": "Ausdruck generieren",
-  "naturalLanguageProcessing": "Verarbeitung...",
-  "processing": "Verarbeitung...",
-  "naturalLanguageTooltip": "Aus Beschreibung generieren",
-  "naturalLanguageSuccess": "Ausdruck erfolgreich generiert",
-  "naturalLanguageError": "Fehler beim Generieren des Ausdrucks",
-  "naturalLanguageEmpty": "Bitte geben Sie eine Beschreibung ein",
-  "configModal": {
-    "title": "Konfiguration",
-    "description": "Anwendungseinstellungen und Präferenzen verwalten",
-    "openButton": "Globale Einstellungen",
-    "tabs": {
-      "general": "Allgemein",
-      "openai": "OpenAI API",
-      "calibration": "Bildschirmkalibrierung",
-      "developer": "Entwickler"
-    },
-    "general": {
-      "title": "Allgemeine Einstellungen",
-      "description": "Grundlegende Anwendungseinstellungen konfigurieren",
-      "languageLabel": "Sprache",
-      "languagePlaceholder": "Sprache auswählen"
-    },
-    "openai": {
-      "title": "OpenAI API Einstellungen",
-      "description": "Konfigurieren Sie Ihren OpenAI API-Schlüssel für die Verarbeitung natürlicher Sprache",
-      "apiKeyLabel": "API-Schlüssel",
-      "apiKeyPlaceholder": "Geben Sie Ihren OpenAI API-Schlüssel ein",
-      "apiKeyHint": "Ihr API-Schlüssel wird lokal gespeichert und verschlüsselt. Er wird niemals an unsere Server gesendet.",
-      "saveApiKey": "API-Schlüssel speichern",
-      "clearApiKey": "API-Schlüssel löschen"
-    },
-    "calibration": {
-      "title": "Bildschirmkalibrierung",
-      "description": "Kalibrieren Sie Ihren Bildschirm für genaue physische Messungen",
-      "instructions": "Ihr Bildschirm zeigt Messungen möglicherweise nicht in ihrer tatsächlichen physischen Größe an. Verwenden Sie dieses Tool, um Ihre Anzeige für genaue Messungen zu kalibrieren.",
-      "lengthLabel": "Kalibrierungslänge",
-      "startButton": "Kalibrierung starten",
-      "placeRuler": "Legen Sie ein physisches Lineal oder Maßband an Ihren Bildschirm und passen Sie die Linie unten an, bis sie genau übereinstimmt",
-      "lineDescription": "Diese Linie sollte genau {length} {unit} lang sein",
-      "coarseAdjustment": "Grobe Anpassung",
-      "fineAdjustment": "Feine Anpassung",
-      "currentValue": "Aktueller Wert",
-      "pixelsPerUnit": "Pixel pro {unit}",
-      "cancelButton": "Abbrechen",
-      "applyButton": "Kalibrierung anwenden"
-    },
-    "developer": {
-      "title": "Entwicklereinstellungen",
-      "description": "Erweiterte Einstellungen für Entwicklung und Debugging",
-      "loggingLabel": "Konsolenprotokollierung",
-      "loggingDescription": "Aktivieren oder deaktivieren Sie die Konsolenprotokollierung mit Zeitstempeln"
-    }
-  },
-  "componentConfigModal": {
-    "title": "Leinwand-Einstellungen",
-    "description": "Leinwand-spezifische Einstellungen und Kalibrierung konfigurieren",
-    "openButton": "Leinwand-Einstellungen",
-    "tabs": {
-      "units": "Maßeinheiten",
-      "calibration": "Bildschirmkalibrierung"
-    },
-    "units": {
-      "title": "Maßeinheiten",
-      "description": "Konfigurieren Sie die in dieser Leinwand verwendeten Maßeinheiten"
-    }
-  },
-  "enterFullscreen": "Vollbild aktivieren",
-  "exitFullscreen": "Vollbild beenden",
-  "previousFormula": "Vorherige Formel",
-  "nextFormula": "Nächste Formel",
-  "formulaDefault": "Neue Funktion",
-  "formulaPlaceholder": "Geben Sie einen Funktionsausdruck ein",
-  "enterFormula": "Geben Sie einen Funktionsausdruck ein",
-  "deleteFormulaTooltip": "Funktion löschen",
-  "scaleMax": "10x",
-  "zoomIn": "Vergrößern",
-  "zoomOut": "Verkleinern",
-  "functionExpression": "Funktionsausdruck",
-  "functionExpressionHint": "Verwenden Sie x als Variable, z.B. x*x, Math.sin(x), usw.",
-  "color": "Farbe",
-  "colorPicker": "Farbe auswählen",
-  "newFormula": "Neue Funktion",
-  "scaleFactor": "Skalierungsfaktor",
-  "scaleFactorHint": "Passen Sie den Skalierungsfaktor an, um den Graphen vertikal zu strecken oder zu komprimieren",
-  "scaleMin": "0,001x",
-  "scaleDefault": "1,0x"
+  "clickOnCurveInstruction": "Klicken Sie auf die Kurve, um einen Punkt auszuwählen und seine Informationen anzuzeigen."
 }

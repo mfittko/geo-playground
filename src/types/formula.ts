@@ -20,7 +20,7 @@ export interface FormulaPoint {
   isValid: boolean; // Flag to track discontinuities/undefined points
 }
 
-export type FormulaExampleCategory = 'basic' | 'trigonometric' | 'exponential' | 'parametric' | 'special' | 'polynomial' | 'polar';
+export type FormulaExampleCategory = 'basic' | 'trigonometric' | 'exponential' | 'parametric' | 'special' | 'polynomial';
 
 export interface FormulaExample {
   name: string;

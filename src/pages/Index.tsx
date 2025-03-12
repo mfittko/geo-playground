@@ -1,37 +1,21 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useShapeOperations } from '@/hooks/useShapeOperations';
 import { useServiceFactory } from '@/providers/ServiceProvider';
-import { useComponentConfig } from '@/context/ConfigContext';
 import GeometryHeader from '@/components/GeometryHeader';
 import GeometryCanvas from '@/components/GeometryCanvas';
 import Toolbar from '@/components/Toolbar';
 import UnitSelector from '@/components/UnitSelector';
 import FormulaEditor from '@/components/FormulaEditor';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslate } from '@/utils/translate';
 import { Point } from '@/types/shapes';
 import { Formula } from '@/types/formula';
 import { getStoredPixelsPerUnit } from '@/utils/geometry/common';
 import { createDefaultFormula } from '@/utils/formulaUtils';
-import ConfigModal from '@/components/ConfigModal';
-import ComponentConfigModal from '@/components/ComponentConfigModal';
-import { Settings, Trash2, Wrench, PlusCircle } from 'lucide-react';
-import { 
-  updateUrlWithData, 
-  getShapesFromUrl, 
-  getGridPositionFromUrl,
-  getFormulasFromUrl
-} from '@/utils/urlEncoding';
-import { toast } from 'sonner';
-import { useIsMobile } from '@/hooks/use-mobile';
-import GlobalControls from '@/components/GlobalControls';
 
 const Index = () => {
   // Get the service factory
   const serviceFactory = useServiceFactory();
-  const { setComponentConfigModalOpen } = useComponentConfig();
-  const isMobile = useIsMobile();
   
   const {
     shapes,
@@ -53,8 +37,7 @@ const Index = () => {
     setActiveShapeType,
     getShapeMeasurements,
     getSelectedShape,
-    updateMeasurement,
-    shareCanvasUrl
+    updateMeasurement
   } = useShapeOperations();
 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -62,11 +45,6 @@ const Index = () => {
   const [isFormulaEditorOpen, setIsFormulaEditorOpen] = useState(false);
   const [selectedFormulaId, setSelectedFormulaId] = useState<string | null>(null);
   const [pixelsPerUnit, setPixelsPerUnit] = useState<number>(getStoredPixelsPerUnit(measurementUnit));
-  
-  // Add a ref to track if we've loaded from URL
-  const hasLoadedFromUrl = useRef(false);
-  // Add a ref for the URL update timeout
-  const urlUpdateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Effect to update pixelsPerUnit when measurement unit changes
   useEffect(() => {
@@ -84,126 +62,6 @@ const Index = () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
-
-  // Function to request fullscreen with better mobile support
-  const requestFullscreen = useCallback(() => {
-    const elem = document.documentElement;
-    
-    // Try different fullscreen methods for better cross-browser and mobile support
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-        // Try alternative approach for iOS
-        if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-          // For iOS, we can use a different approach
-          document.body.style.position = 'fixed';
-          document.body.style.top = '0';
-          document.body.style.left = '0';
-          document.body.style.width = '100%';
-          document.body.style.height = '100%';
-          document.body.style.zIndex = '9999';
-          setIsFullscreen(true);
-        }
-      });
-    } else if ('webkitRequestFullscreen' in elem) {
-      // Use type assertion with a more specific type
-      (elem as HTMLElement & { webkitRequestFullscreen(): Promise<void> }).webkitRequestFullscreen();
-    } else if ('msRequestFullscreen' in elem) {
-      // Use type assertion with a more specific type
-      (elem as HTMLElement & { msRequestFullscreen(): Promise<void> }).msRequestFullscreen();
-    } else {
-      // Fallback for devices that don't support fullscreen API
-      document.body.style.position = 'fixed';
-      document.body.style.top = '0';
-      document.body.style.left = '0';
-      document.body.style.width = '100%';
-      document.body.style.height = '100%';
-      document.body.style.zIndex = '9999';
-      setIsFullscreen(true);
-    }
-  }, []);
-
-  // Function to exit fullscreen with better mobile support
-  const exitFullscreen = useCallback(() => {
-    if (document.exitFullscreen) {
-      document.exitFullscreen().catch(err => {
-        console.error(`Error attempting to exit fullscreen: ${err.message}`);
-      });
-    } else if ('webkitExitFullscreen' in document) {
-      // Use type assertion with a more specific type
-      (document as Document & { webkitExitFullscreen(): Promise<void> }).webkitExitFullscreen();
-    } else if ('msExitFullscreen' in document) {
-      // Use type assertion with a more specific type
-      (document as Document & { msExitFullscreen(): Promise<void> }).msExitFullscreen();
-    }
-    
-    // Reset any manual fullscreen styles we might have applied
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.width = '';
-    document.body.style.height = '';
-    document.body.style.zIndex = '';
-    
-    // If we're using the fallback approach, manually set fullscreen state
-    if (!document.fullscreenElement && 
-        !('webkitFullscreenElement' in document) && 
-        !('msFullscreenElement' in document)) {
-      setIsFullscreen(false);
-    }
-  }, []);
-
-  // Toggle fullscreen
-  const toggleFullscreen = useCallback(() => {
-    if (!isFullscreen) {
-      requestFullscreen();
-    } else {
-      exitFullscreen();
-    }
-  }, [isFullscreen, requestFullscreen, exitFullscreen]);
-  
-  // Load formulas from URL when component mounts
-  useEffect(() => {
-    if (hasLoadedFromUrl.current) {
-      return;
-    }
-
-    // Load formulas from URL
-    const formulasFromUrl = getFormulasFromUrl();
-    if (formulasFromUrl && formulasFromUrl.length > 0) {
-      setFormulas(formulasFromUrl);
-      setSelectedFormulaId(formulasFromUrl[0].id);
-      setIsFormulaEditorOpen(true);
-      toast.success(`Loaded ${formulasFromUrl.length} formulas from URL`);
-    }
-
-    // Mark as loaded from URL
-    hasLoadedFromUrl.current = true;
-  }, []);
-  
-  // Update URL whenever shapes, formulas, or grid position change, but only after initial load
-  useEffect(() => {
-    if (!hasLoadedFromUrl.current) {
-      return;
-    }
-
-    if (shapes.length > 0 || formulas.length > 0 || gridPosition) {
-      if (urlUpdateTimeoutRef.current) {
-        clearTimeout(urlUpdateTimeoutRef.current);
-      }
-
-      urlUpdateTimeoutRef.current = setTimeout(() => {
-        updateUrlWithData(shapes, formulas, gridPosition);
-        urlUpdateTimeoutRef.current = null;
-      }, 300);
-    }
-
-    return () => {
-      if (urlUpdateTimeoutRef.current) {
-        clearTimeout(urlUpdateTimeoutRef.current);
-      }
-    };
-  }, [shapes, formulas, gridPosition]);
 
   // Handle formula operations
   const handleAddFormula = useCallback((formula: Formula) => {
@@ -252,24 +110,11 @@ const Index = () => {
       } else if (newState && formulas.length > 0 && !selectedFormulaId) {
         // If opening and there are formulas but none selected, select the first one
         setSelectedFormulaId(formulas[0].id);
-      } else if (!newState) {
-        // If closing the editor, we should clear the selected formula to prevent auto-reopening
-        setSelectedFormulaId(null);
       }
       
       return newState;
     });
   }, [formulas.length, handleAddFormula, selectedFormulaId]);
-
-  // Open formula editor when a formula is selected (e.g., by clicking a point on the graph)
-  useEffect(() => {
-    // If a formula is selected but the editor is not open, open it
-    // But only if the selection wasn't triggered by the toggle function
-    if (selectedFormulaId && !isFormulaEditorOpen) {
-      // This is typically triggered when clicking on a formula point in the graph
-      setIsFormulaEditorOpen(true);
-    }
-  }, [selectedFormulaId, isFormulaEditorOpen]);
 
   const selectedShape = getSelectedShape();
   
@@ -309,19 +154,15 @@ const Index = () => {
   }, [updateGridPosition]);
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isFullscreen || isMobile ? 'p-0' : ''}`}>
-      <div className={`${isFullscreen || isMobile ? 'max-w-full p-0' : 'container py-0 sm:py-2 md:py-4 lg:py-8 px-0 sm:px-2 md:px-4'} transition-all duration-200 h-[calc(100vh-0rem)] sm:h-[calc(100vh-0.5rem)]`}>
+    <div className={`min-h-screen bg-gray-50 ${isFullscreen ? 'p-2' : ''}`}>
+      <div className={`${isFullscreen ? 'max-w-full p-2' : 'container py-8'} transition-all duration-200 h-[calc(100vh-2rem)]`}>
         <GeometryHeader isFullscreen={isFullscreen} />
         
-        {/* Include both modals */}
-        <ConfigModal />
-        <ComponentConfigModal />
-        
-        <div className={`${isMobile || isFullscreen ? 'h-full' : 'h-[calc(100%-3rem)] sm:h-[calc(100%-4rem)]'}`}>
+        <div className="h-[calc(100%-4rem)]">
           <div className="h-full">
             <div className="flex flex-col h-full">
-              <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between ${isFullscreen || isMobile ? 'space-y-1 sm:space-y-0 sm:space-x-1 px-1' : 'space-y-1 sm:space-y-0 sm:space-x-2 px-1 sm:px-2'} ${isMobile ? 'mb-0' : 'mb-1 sm:mb-2'}`}>
-                <div className="flex flex-row items-center space-x-1 sm:space-x-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
+              <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between ${isFullscreen ? 'space-y-1 sm:space-y-0 sm:space-x-1' : 'space-y-2 sm:space-y-0 sm:space-x-2'} mb-2`}>
+                <div className="flex flex-row items-center space-x-2">
                   <Toolbar
                     activeMode={activeMode}
                     activeShapeType={activeShapeType}
@@ -334,17 +175,29 @@ const Index = () => {
                     onToggleFormulaEditor={toggleFormulaEditor}
                     isFormulaEditorOpen={isFormulaEditorOpen}
                   />
+                  
+                  <div className="h-8 w-px bg-gray-200 mx-1" />
+                  
+                  <div className="w-24">
+                    <UnitSelector
+                      value={measurementUnit}
+                      onChange={setMeasurementUnit}
+                    />
+                  </div>
                 </div>
                 
-                <GlobalControls 
-                  isFullscreen={isFullscreen} 
-                  onToggleFullscreen={toggleFullscreen}
-                  onShare={shareCanvasUrl}
-                />
+                <Button 
+                  variant="outline"
+                  size="sm"
+                  onClick={deleteAllShapes}
+                  className="text-sm"
+                >
+                  {t('clearCanvas')}
+                </Button>
               </div>
               
               {isFormulaEditorOpen && (
-                <div className="w-full mb-1 sm:mb-2 md:mb-3">
+                <div className="mb-4">
                   <FormulaEditor
                     formulas={formulas}
                     onAddFormula={handleAddFormula}
@@ -354,11 +207,6 @@ const Index = () => {
                     isOpen={isFormulaEditorOpen}
                     selectedFormulaId={selectedFormulaId}
                     onSelectFormula={setSelectedFormulaId}
-                    onNewFormula={() => {
-                      const newFormula = createDefaultFormula('function');
-                      newFormula.expression = "x*x";
-                      handleAddFormula(newFormula);
-                    }}
                   />
                 </div>
               )}
@@ -377,59 +225,11 @@ const Index = () => {
                 onShapeMove={moveShape}
                 onShapeResize={resizeShape}
                 onShapeRotate={rotateShape}
-                onShapeDelete={deleteShape}
                 onModeChange={setActiveMode}
                 onMoveAllShapes={handleMoveAllShapes}
                 onGridPositionChange={handleGridPositionChange}
                 serviceFactory={serviceFactory}
                 onMeasurementUpdate={updateMeasurement}
-                onFormulaSelect={setSelectedFormulaId}
-                canvasTools={
-                  <div className="absolute top-2 right-2 z-10 flex space-x-1">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7 sm:h-8 sm:w-8 bg-white/80 backdrop-blur-sm"
-                            onClick={deleteAllShapes}
-                          >
-                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t('clearCanvas')}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            variant="outline"
-                            size="icon"
-                            className="h-7 w-7 sm:h-8 sm:w-8 bg-white/80 backdrop-blur-sm"
-                            onClick={() => setComponentConfigModalOpen(true)}
-                          >
-                            <Wrench className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t('componentConfigModal.openButton')}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    
-                    {/* Add UnitSelector here */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-md">
-                      <UnitSelector
-                        value={measurementUnit}
-                        onChange={setMeasurementUnit}
-                        compact={true}
-                      />
-                    </div>
-                  </div>
-                }
               />
             </div>
           </div>

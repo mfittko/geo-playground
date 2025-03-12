@@ -101,24 +101,7 @@
     "lineExplanation": "Calcula la distancia en línea recta entre dos puntos",
     "select": "Seleccionar y Mover Formas",
     "rotate": "Rotar Forma",
-    "delete": "Eliminar Seleccionado",
-    "plot": "Graficar Funciones",
-    "plotDescription": "Crear y visualizar funciones matemáticas",
-    "calibrate": "Calibrar Pantalla",
-    "calibrateDescription": "Ajustar la calibración de la pantalla para mediciones físicas precisas",
-    "coarseAdjustment": "Ajuste grueso: realizar cambios mayores en la calibración",
-    "fineAdjustment": "Ajuste fino: realizar cambios menores en la calibración",
-    "zoomIn": "Acercar para ver más detalles",
-    "zoomOut": "Alejar para ver más del gráfico",
-    "move": "Mover Forma",
-    "draw": "Dibujar Forma",
-    "clear": "Borrar Todas las Formas",
-    "moveDescription": "Mover la forma seleccionada",
-    "rotateDescription": "Rotar la forma seleccionada",
-    "clearDescription": "Eliminar todas las formas del lienzo",
-    "examplesButtonTooltip": "Explorar funciones de ejemplo",
-    "scaleFactorTooltip": "Ajustar factor de escala",
-    "colorPickerTooltip": "Cambiar color de la función"
+    "delete": "Eliminar Seleccionado"
   },
   "pointX": "X",
   "pointY": "Y",
@@ -127,105 +110,5 @@
   "parametricPointInfo": "Función paramétrica (valor t no disponible)",
   "polarPointInfo": "Función polar (valor θ no disponible)",
   "pointInfoTitle": "Información del Punto",
-  "clickOnCurveInstruction": "Haz clic en la curva para seleccionar un punto y ver su información.",
-  "infoPanel": "Panel de Información",
-  "shapeInfo": "Info de Forma",
-  "pointInfo": "Info de Punto",
-  "categories": {
-    "basic": "Funciones básicas",
-    "trigonometric": "Funciones trigonométricas",
-    "exponential": "Exponenciales y logarítmicas",
-    "parametric": "Curvas paramétricas",
-    "special": "Funciones especiales",
-    "polynomial": "Polinomios"
-  },
-  "naturalLanguageTitle": "Describir tu función",
-  "naturalLanguage": "Generador de Funciones IA",
-  "naturalLanguagePlaceholder": "Describe la función en lenguaje natural, p.ej., 'una parábola que se abre hacia arriba' o 'onda sinusoidal con período de 2π'",
-  "naturalLanguageDescription": "Utiliza lenguaje natural o pseudocódigo para describir la función que deseas crear. OpenAI la convertirá en una expresión matemática.",
-  "naturalLanguageGenerate": "Generar Expresión",
-  "naturalLanguageProcessing": "Procesando...",
-  "processing": "Procesando...",
-  "naturalLanguageTooltip": "Generar desde descripción",
-  "naturalLanguageSuccess": "Expresión generada con éxito",
-  "naturalLanguageError": "Error al generar la expresión",
-  "naturalLanguageEmpty": "Por favor, introduce una descripción",
-  "configModal": {
-    "title": "Configuración",
-    "description": "Gestionar ajustes y preferencias de la aplicación",
-    "openButton": "Ajustes Globales",
-    "tabs": {
-      "general": "General",
-      "openai": "API de OpenAI",
-      "calibration": "Calibración de Pantalla",
-      "developer": "Desarrollador"
-    },
-    "general": {
-      "title": "Ajustes Generales",
-      "description": "Configurar ajustes básicos de la aplicación",
-      "languageLabel": "Idioma",
-      "languagePlaceholder": "Seleccionar idioma"
-    },
-    "openai": {
-      "title": "Ajustes de la API de OpenAI",
-      "description": "Configurar tu clave de API de OpenAI para el procesamiento de lenguaje natural",
-      "apiKeyLabel": "Clave de API",
-      "apiKeyPlaceholder": "Introduce tu clave de API de OpenAI",
-      "apiKeyHint": "Tu clave de API se almacena localmente y se encripta. Nunca se envía a nuestros servidores.",
-      "saveApiKey": "Guardar Clave de API",
-      "clearApiKey": "Borrar Clave de API"
-    },
-    "calibration": {
-      "title": "Calibración de Pantalla",
-      "description": "Calibra tu pantalla para mediciones físicas precisas",
-      "instructions": "Es posible que tu pantalla no muestre las medidas en su tamaño físico real. Utiliza esta herramienta para calibrar tu pantalla para mediciones precisas.",
-      "lengthLabel": "Longitud de Calibración",
-      "startButton": "Iniciar Calibración",
-      "placeRuler": "Coloca una regla física o cinta métrica contra tu pantalla y ajusta la línea de abajo hasta que coincida exactamente",
-      "lineDescription": "Esta línea debe medir exactamente {length} {unit}",
-      "coarseAdjustment": "Ajuste Grueso",
-      "fineAdjustment": "Ajuste Fino",
-      "currentValue": "Valor Actual",
-      "pixelsPerUnit": "píxeles por {unit}",
-      "cancelButton": "Cancelar",
-      "applyButton": "Aplicar Calibración"
-    },
-    "developer": {
-      "title": "Ajustes de Desarrollador",
-      "description": "Ajustes avanzados para desarrollo y depuración",
-      "loggingLabel": "Registro en Consola",
-      "loggingDescription": "Activar o desactivar el registro en consola con marcas de tiempo"
-    }
-  },
-  "componentConfigModal": {
-    "title": "Ajustes del Lienzo",
-    "description": "Configurar ajustes específicos del lienzo y calibración",
-    "openButton": "Ajustes del Lienzo",
-    "tabs": {
-      "units": "Unidades de Medida",
-      "calibration": "Calibración de Pantalla"
-    },
-    "units": {
-      "title": "Unidades de Medida",
-      "description": "Configurar las unidades utilizadas para mediciones en este lienzo"
-    }
-  },
-  "enterFullscreen": "Entrar en Pantalla Completa",
-  "exitFullscreen": "Salir de Pantalla Completa",
-  "formulaDefault": "Nueva Función",
-  "formulaPlaceholder": "Introduce una expresión de función",
-  "enterFormula": "Introduce una expresión de función",
-  "deleteFormulaTooltip": "Eliminar función",
-  "scaleMax": "10x",
-  "zoomIn": "Acercar",
-  "zoomOut": "Alejar",
-  "functionExpression": "Expresión de Función",
-  "functionExpressionHint": "Usa x como variable, ej. x*x, Math.sin(x), etc.",
-  "color": "Color",
-  "colorPicker": "Elegir un color",
-  "newFormula": "Nueva Función",
-  "scaleFactor": "Factor de Escala",
-  "scaleFactorHint": "Ajusta el factor de escala para estirar o comprimir el gráfico verticalmente",
-  "scaleMin": "0,001x",
-  "scaleDefault": "1,0x"
+  "clickOnCurveInstruction": "Haz clic en la curva para seleccionar un punto y ver su información."
 } 

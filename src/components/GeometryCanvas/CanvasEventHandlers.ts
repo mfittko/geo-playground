@@ -37,7 +37,6 @@ export interface EventHandlerParams {
   onShapeMove: (id: string, newPosition: Point) => void;
   onShapeResize: (id: string, factor: number) => void;
   onShapeRotate: (id: string, angle: number) => void;
-  onShapeDelete?: (id: string) => void;
   onModeChange?: (mode: OperationMode) => void;
   serviceFactory?: ShapeServiceFactory;
 }
@@ -448,8 +447,7 @@ export const createHandleKeyDown = (params: EventHandlerParams) => {
     measurementUnit,
     gridPosition,
     onShapeMove,
-    onShapeResize,
-    onShapeDelete
+    onShapeResize
   } = params;
   
   // Helper function to snap a point to the grid
@@ -528,17 +526,6 @@ export const createHandleKeyDown = (params: EventHandlerParams) => {
         e.preventDefault();
         console.log(`Scaled shape ${selectedShapeId} down by factor ${1 / scaleFactor}`);
         return; // Exit early as we don't need to move the shape
-        
-      // Deletion key
-      case 'Backspace':
-      case 'Delete':
-        if (onShapeDelete) {
-          onShapeDelete(selectedShapeId);
-          e.preventDefault();
-          console.log(`Deleted shape ${selectedShapeId}`);
-          return; // Exit early as we've deleted the shape
-        }
-        return;
         
       default:
         return; // Exit if not a handled key

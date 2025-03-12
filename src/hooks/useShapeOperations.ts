@@ -3,14 +3,13 @@ import {
   AnyShape, Point, ShapeType, OperationMode, MeasurementUnit
 } from '@/types/shapes';
 import { toast } from 'sonner';
-import { useComponentConfig } from '@/context/ConfigContext';
 
 // Import utility functions
 import { getStoredPixelsPerUnit } from '@/utils/geometry/common';
 import { getShapeMeasurements, convertToPixels, convertFromPixels } from '@/utils/geometry/measurements';
 // Import URL encoding utilities
 import { 
-  updateUrlWithData, 
+  updateUrlWithShapes, 
   getShapesFromUrl, 
   getGridPositionFromUrl 
 } from '@/utils/urlEncoding';
@@ -24,6 +23,7 @@ export function useShapeOperations() {
   const [selectedShapeId, setSelectedShapeId] = useState<string | null>(null);
   const [activeMode, setActiveMode] = useState<OperationMode>('select');
   const [activeShapeType, setActiveShapeType] = useState<ShapeType>('rectangle');
+  const [measurementUnit, setMeasurementUnit] = useState<MeasurementUnit>('cm');
   const [dragStart, setDragStart] = useState<Point | null>(null);
   
   // Add state for grid position
@@ -43,52 +43,65 @@ export function useShapeOperations() {
   // Get the service factory
   const serviceFactory = useServiceFactory();
   
-  // Get the measurement unit from the context
-  const { measurementUnit, setMeasurementUnit } = useComponentConfig();
-  
   // Load shapes and grid position from URL when component mounts
   useEffect(() => {
     if (hasLoadedFromUrl.current) {
+      console.log('useShapeOperations: Already loaded from URL, skipping');
       return;
     }
-
+    
+    console.log('useShapeOperations: Loading shapes and grid position from URL');
+    
     // Load shapes from URL
     const shapesFromUrl = getShapesFromUrl();
     if (shapesFromUrl && shapesFromUrl.length > 0) {
+      console.log('useShapeOperations: Loaded shapes from URL:', shapesFromUrl.length, 'shapes');
       setShapes(shapesFromUrl);
       toast.success(`Loaded ${shapesFromUrl.length} shapes from URL`);
+    } else {
+      console.log('useShapeOperations: No shapes found in URL');
     }
-
+    
     // Load grid position from URL
     const gridPositionFromUrl = getGridPositionFromUrl();
     if (gridPositionFromUrl) {
+      console.log('useShapeOperations: Loaded grid position from URL:', gridPositionFromUrl);
+      // Ensure we set the grid position with the exact values from the URL
       setGridPosition({
         x: gridPositionFromUrl.x,
         y: gridPositionFromUrl.y
       });
+    } else {
+      console.log('useShapeOperations: No grid position found in URL');
+      // Important: Don't set a default grid position here, let the CanvasGrid component handle it
     }
-
+    
     // Mark as loaded from URL
     hasLoadedFromUrl.current = true;
   }, []);
   
   // Update URL whenever shapes or grid position change, but only after initial load
   useEffect(() => {
+    // Skip the first render to avoid overwriting the URL before we've loaded from it
     if (!hasLoadedFromUrl.current) {
+      console.log('useShapeOperations: Skipping URL update until loaded from URL');
       return;
     }
-
+    
+    // Only update URL if we have shapes or a grid position
     if (shapes.length > 0 || gridPosition) {
+      // Use a debounce to prevent too many URL updates
       if (gridUpdateTimeoutRef.current) {
         clearTimeout(gridUpdateTimeoutRef.current);
       }
-
+      
       gridUpdateTimeoutRef.current = setTimeout(() => {
-        updateUrlWithData(shapes, [], gridPosition);
+        console.log('useShapeOperations: Updating URL with shapes and grid position');
+        updateUrlWithShapes(shapes, gridPosition);
         gridUpdateTimeoutRef.current = null;
       }, 300);
     }
-
+    
     return () => {
       if (gridUpdateTimeoutRef.current) {
         clearTimeout(gridUpdateTimeoutRef.current);
@@ -100,6 +113,11 @@ export function useShapeOperations() {
   useEffect(() => {
     setRefreshCalibration(prev => prev + 1);
   }, []);
+  
+  // Force refresh of calibration values when measurement unit changes
+  useEffect(() => {
+    setRefreshCalibration(prev => prev + 1);
+  }, [measurementUnit]);
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const pixelsPerCm = useMemo(() => getStoredPixelsPerUnit('cm'), [refreshCalibration]);
@@ -183,7 +201,7 @@ export function useShapeOperations() {
     setShapes(prevShapes => {
       const updatedShapes = [...prevShapes, newShape];
       // Update URL with the new shapes
-      updateUrlWithData(updatedShapes, [], gridPosition);
+      updateUrlWithShapes(updatedShapes, gridPosition);
       return updatedShapes;
     });
     
@@ -194,6 +212,12 @@ export function useShapeOperations() {
   
   // Select a shape
   const handleSelectShape = useCallback((id: string | null) => {
+    setShapes(prevShapes => 
+      prevShapes.map(shape => ({
+        ...shape,
+        selected: shape.id === id
+      }))
+    );
     setSelectedShapeId(id);
   }, []);
   
@@ -260,7 +284,7 @@ export function useShapeOperations() {
         });
         
         // Update URL with the new shape positions
-        updateUrlWithData(updatedShapes, [], gridPosition);
+        updateUrlWithShapes(updatedShapes, gridPosition);
         return updatedShapes;
       });
       
@@ -278,7 +302,7 @@ export function useShapeOperations() {
       });
       
       // Update URL with the new shape positions
-      updateUrlWithData(updatedShapes, [], gridPosition);
+      updateUrlWithShapes(updatedShapes, gridPosition);
       return updatedShapes;
     });
   }, [gridPosition, handleSnapToGrid, shapes, serviceFactory]);
@@ -297,7 +321,7 @@ export function useShapeOperations() {
       });
       
       // Update URL with the resized shapes
-      updateUrlWithData(updatedShapes, [], gridPosition);
+      updateUrlWithShapes(updatedShapes, gridPosition);
       return updatedShapes;
     });
   }, [gridPosition, serviceFactory]);
@@ -316,7 +340,7 @@ export function useShapeOperations() {
       });
       
       // Update URL with the rotated shapes
-      updateUrlWithData(updatedShapes, [], gridPosition);
+      updateUrlWithShapes(updatedShapes, gridPosition);
       return updatedShapes;
     });
   }, [gridPosition, serviceFactory]);
@@ -326,7 +350,7 @@ export function useShapeOperations() {
     setShapes(prevShapes => {
       const updatedShapes = prevShapes.filter(shape => shape.id !== id);
       // Update URL after deleting the shape
-      updateUrlWithData(updatedShapes, [], gridPosition);
+      updateUrlWithShapes(updatedShapes, gridPosition);
       return updatedShapes;
     });
     if (selectedShapeId === id) {
@@ -342,14 +366,19 @@ export function useShapeOperations() {
     // Don't reset grid position to preserve formulas/plots at their current position
     // setGridPosition(null);
     // Update URL with empty shapes but keep the current grid position
-    updateUrlWithData([], [], gridPosition);
+    updateUrlWithShapes([], gridPosition);
     toast.info("All shapes cleared, plots preserved");
   }, [gridPosition]);
   
   // Update the grid position update function to use our new utility
   const updateGridPosition = useCallback((newPosition: Point) => {
+    console.log('useShapeOperations: Updating grid position:', newPosition);
+    
+    // Check if the change is significant enough to update
     if (isSignificantGridChange(newPosition, gridPosition)) {
       setGridPosition(newPosition);
+    } else {
+      console.log('useShapeOperations: Ignoring small grid position change to prevent oscillation');
     }
   }, [gridPosition]);
   
@@ -399,61 +428,32 @@ export function useShapeOperations() {
     const currentMeasurements = shapeService.getMeasurements(selectedShape, measurementUnit);
     const originalValue = currentMeasurements[key] || 0;
     
-    // Store the original position to ensure it's preserved
-    const originalPosition = selectedShape.position;
-    
-    // Use the service to update the shape from measurement
-    const updatedShape = shapeService.updateFromMeasurement(
-      selectedShape,
-      key,
-      numValue,
-      originalValue,
-      measurementUnit
-    );
-    
-    // Ensure position is preserved for all shape types
-    if (updatedShape.position.x !== originalPosition.x || 
-        updatedShape.position.y !== originalPosition.y) {
-      updatedShape.position = { ...originalPosition };
-    }
-    
-    // Update the shapes state with the new shape
     setShapes(prevShapes => {
-      const updatedShapes = prevShapes.map(shape => 
-        shape.id === selectedShapeId ? updatedShape : shape
-      );
+      const updatedShapes = prevShapes.map(shape => {
+        if (shape.id !== selectedShapeId) return shape;
+        
+        // Use the service to update the shape from measurement
+        return shapeService.updateFromMeasurement(
+          shape,
+          key,
+          numValue,
+          originalValue,
+          measurementUnit
+        );
+      });
       
       // Update URL with the updated shapes
-      updateUrlWithData(updatedShapes, [], gridPosition);
+      updateUrlWithShapes(updatedShapes, gridPosition);
       return updatedShapes;
     });
     
-    // Log the update for debugging
-    console.log(`Updated ${selectedShape.type} measurement: ${key} from ${originalValue} to ${numValue}`);
-    
-    // Force a re-render to ensure the UI updates with the new measurements
-    // This is crucial for all shape types, especially triangles
-    setTimeout(() => {
-      // Create a new array reference to trigger a re-render
-      setShapes(prevShapes => {
-        // Get the updated shape again to ensure we have the latest version
-        const updatedShapeIndex = prevShapes.findIndex(s => s.id === selectedShapeId);
-        if (updatedShapeIndex >= 0) {
-          // Create a new array with the updated shape
-          const newShapes = [...prevShapes];
-          // Create a new reference for the shape to ensure React detects the change
-          newShapes[updatedShapeIndex] = { ...newShapes[updatedShapeIndex] };
-          return newShapes;
-        }
-        return [...prevShapes];
-      });
-    }, 10);
-  }, [selectedShapeId, getSelectedShape, serviceFactory, measurementUnit, gridPosition, updateUrlWithData]);
+    toast.success("Shape updated");
+  }, [selectedShapeId, getSelectedShape, measurementUnit, gridPosition, serviceFactory]);
   
   // Function to share the current canvas state via URL
   const shareCanvasUrl = useCallback(() => {
     // Create a URL with the current shapes and grid position
-    updateUrlWithData(shapes, [], gridPosition);
+    updateUrlWithShapes(shapes, gridPosition);
     
     // Copy the URL to clipboard
     navigator.clipboard.writeText(window.location.href)

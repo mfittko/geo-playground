@@ -56,7 +56,7 @@ const UnitSelector: React.FC<UnitSelectorProps> = ({
         <SelectContent position="popper">
           {(Object.keys(unitLabels) as MeasurementUnit[]).map((unit) => (
             <SelectItem key={unit} value={unit}>
-              {unit}
+              {t(unitLabels[unit])}
             </SelectItem>
           ))}
         </SelectContent>

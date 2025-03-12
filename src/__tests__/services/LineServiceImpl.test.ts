@@ -33,8 +33,8 @@ describe('LineServiceImpl', () => {
       expect(shape.type).toBe('line');
       expect(shape.startPoint).toEqual({ x: 0, y: 0 });
       expect(shape.endPoint).toEqual({ x: 100, y: 100 });
-      expect(shape.fillColor).toBe('transparent');
-      expect(shape.strokeColor).toMatch(/^rgba\(\d+, \d+, \d+, \d+(\.\d+)?\)$/);
+      expect(shape.fill).toBe('transparent');
+      expect(shape.stroke).toMatch(/^rgba\(\d+, \d+, \d+, \d+(\.\d+)?\)$/);
     });
 
     it('should create a line with provided values', () => {
@@ -47,7 +47,7 @@ describe('LineServiceImpl', () => {
       expect(shape.type).toBe('line');
       expect(shape.startPoint).toEqual({ x: 50, y: 50 });
       expect(shape.endPoint).toEqual({ x: 150, y: 150 });
-      expect(shape.strokeColor).toBe('#0000ff');
+      expect(shape.stroke).toBe('#0000ff');
     });
   });
 
@@ -62,8 +62,8 @@ describe('LineServiceImpl', () => {
       expect(l.type).toBe('line');
       expect(l.startPoint).toEqual(startPoint);
       expect(l.endPoint).toEqual(endPoint);
-      expect(l.strokeColor).toBe(color);
-      expect(l.fillColor).toBe('transparent');
+      expect(l.stroke).toBe(color);
+      expect(l.fill).toBe('transparent');
     });
 
     it('should calculate length correctly', () => {
@@ -122,19 +122,17 @@ describe('LineServiceImpl', () => {
       const lengthInCm = lengthInPixels / pixelsPerCm;
       
       expect(measurements.length).toBeCloseTo(lengthInCm);
-      
-      // In our test setup, the line goes from (100,100) to (200,200)
-      // This creates a 45-degree angle
+      // The angle in measurements is in degrees, but calculateAngle returns radians
+      // So we need to convert the radians to degrees for comparison
       const angleInDegrees = measurements.angle;
+      const angleInRadians = service.calculateAngle(line);
       
-      // Check if the angle is already in degrees or needs conversion
-      if (Math.abs(angleInDegrees) < Math.PI * 2) {
-        // If the angle is in radians (small value), convert to degrees for comparison
-        expect(radiansToDegrees(angleInDegrees)).toBeCloseTo(45);
-      } else {
-        // If the angle is already in degrees
-        expect(angleInDegrees).toBeCloseTo(45);
-      }
+      // For this specific test, we know the line is at 45 degrees (from 100,100 to 200,200)
+      // In the mathematical system, this is 45 degrees counterclockwise
+      // In the UI system (clockwise), this becomes -45 degrees
+      
+      // We expect the angle to be -45 degrees
+      expect(angleInDegrees).toBeCloseTo(-45);
     });
   });
 
@@ -153,12 +151,11 @@ describe('LineServiceImpl', () => {
       const newAngle = 45; // 45 degrees
       const updated = service.updateFromMeasurement(line, 'angle', newAngle, service.calculateAngle(line));
       
-      // In our updated implementation, we store the UI angle directly
-      // So we expect the rotation to be exactly the angle we provided
-      const expectedAngleRadians = degreesToRadians(newAngle);
+      // Convert the expected angle to radians in counterclockwise direction
+      const expectedAngleRadians = degreesToRadians(toCounterclockwiseAngle(newAngle));
       
       // Get the actual angle in radians
-      const actualAngleRadians = degreesToRadians(updated.rotation);
+      const actualAngleRadians = service.calculateAngle(updated);
       
       // Compare the angles
       expect(actualAngleRadians).toBeCloseTo(expectedAngleRadians);

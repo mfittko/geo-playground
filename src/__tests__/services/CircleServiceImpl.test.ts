@@ -20,9 +20,10 @@ describe('CircleServiceImpl', () => {
       position: { x: 100, y: 100 },
       radius: 50,
       rotation: 0,
-      fillColor: '#4CAF50',
-      strokeColor: '#000000',
-      opacity: 1
+      selected: false,
+      fill: '#4CAF50',
+      stroke: '#000000',
+      strokeWidth: 1
     };
     
     // Reset the mock before each test
@@ -31,45 +32,43 @@ describe('CircleServiceImpl', () => {
   });
 
   describe('createShape', () => {
-    it('should create a circle with default values when no params are provided', () => {
+    it('should create a circle with default values when no params provided', () => {
       const shape = service.createShape({});
       
-      expect(shape.id).toBeDefined();
       expect(shape.type).toBe('circle');
-      expect(shape.position).toEqual({ x: 0, y: 0 });
       expect(shape.radius).toBe(50);
-      expect(shape.rotation).toBe(0);
-      expect(shape.fillColor).toMatch(/^rgba\(\d+, \d+, \d+, \d+(\.\d+)?\)$|^#[0-9A-Fa-f]{6}$/);
-      expect(shape.strokeColor).toBeDefined();
-      expect(shape.opacity).toBe(1);
+      expect(shape.position).toEqual({ x: 0, y: 0 });
+      expect(shape.fill).toMatch(/^rgba\(\d+, \d+, \d+, \d+(\.\d+)?\)$/);
     });
-    
+
     it('should create a circle with provided values', () => {
-      const params = {
-        position: { x: 200, y: 200 },
+      const shape = service.createShape({
+        center: { x: 50, y: 50 },
         radius: 75,
         color: '#0000ff'
-      };
+      });
       
-      const shape = service.createShape(params);
-      
-      expect(shape.position).toEqual(params.position);
-      expect(shape.radius).toBe(params.radius);
-      expect(shape.fillColor).toBe(params.color);
+      expect(shape.type).toBe('circle');
+      expect(shape.radius).toBe(75);
+      expect(shape.position).toEqual({ x: 50, y: 50 });
+      expect(shape.fill).toBe('#0000ff');
     });
   });
 
   describe('createCircle', () => {
     it('should create a circle with the specified parameters', () => {
-      const center = { x: 150, y: 150 };
-      const radius = 60;
-      const color = '#ff0000';
+      const center = { x: 50, y: 50 };
+      const radius = 25;
+      const color = '#00ff00';
       
       const c = service.createCircle(center, radius, color);
       
+      expect(c.type).toBe('circle');
       expect(c.position).toEqual(center);
       expect(c.radius).toBe(radius);
-      expect(c.fillColor).toBe(color);
+      expect(c.fill).toBe(color);
+      expect(c.rotation).toBe(0);
+      expect(c.selected).toBe(false);
     });
 
     it('should ensure minimum radius of 1', () => {
@@ -223,23 +222,6 @@ describe('CircleServiceImpl', () => {
       const scaled = service.scaleCircle(circle, scaleFactor);
       
       expect(scaled.radius).toBe(circle.radius * scaleFactor);
-    });
-    
-    it('should preserve original dimensions when scaling multiple times', () => {
-      // First scaling
-      const firstScaleFactor = 1.5;
-      let scaled = service.scaleCircle(circle, firstScaleFactor);
-      
-      // Second scaling
-      const secondScaleFactor = 0.8;
-      scaled = service.scaleCircle(scaled, secondScaleFactor);
-      
-      // The radius should be based on the original dimensions, not compounding
-      expect(scaled.radius).toBeCloseTo(circle.radius * secondScaleFactor);
-      
-      // Original dimensions should be preserved
-      expect(scaled.originalDimensions).toBeDefined();
-      expect(scaled.originalDimensions?.radius).toBe(circle.radius);
     });
   });
 

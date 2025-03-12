@@ -4,7 +4,7 @@ import { AnyShape } from '@/types/shapes';
 
 describe('Shape Operations - Selection', () => {
   describe('selectShape', () => {
-    it('should return the shapes array unchanged', () => {
+    it('should select a shape by ID', () => {
       // Arrange
       const shapes = createTestShapes();
       const targetId = 'rectangle-1';
@@ -15,23 +15,35 @@ describe('Shape Operations - Selection', () => {
       // Assert
       expect(result.length).toBe(shapes.length);
       
-      // The shapes array should be a new array (not the same reference)
-      expect(result).not.toBe(shapes);
+      // The target shape should be selected
+      const selectedShape = result.find(shape => shape.id === targetId);
+      expect(selectedShape).toBeDefined();
+      expect(selectedShape?.selected).toBe(true);
       
-      // But the contents should be the same
-      expect(result).toEqual(shapes);
+      // All other shapes should not be selected
+      const otherShapes = result.filter(shape => shape.id !== targetId);
+      otherShapes.forEach(shape => {
+        expect(shape.selected).toBe(false);
+      });
     });
     
-    it('should handle null ID', () => {
+    it('should deselect all shapes when null ID is provided', () => {
       // Arrange
-      const shapes = createTestShapes();
+      const shapes = createTestShapes().map(shape => ({
+        ...shape,
+        selected: true
+      }));
       
       // Act
       const result = selectShape(shapes, null);
       
       // Assert
       expect(result.length).toBe(shapes.length);
-      expect(result).toEqual(shapes);
+      
+      // All shapes should be deselected
+      result.forEach(shape => {
+        expect(shape.selected).toBe(false);
+      });
     });
     
     it('should handle non-existent shape ID', () => {
@@ -44,7 +56,11 @@ describe('Shape Operations - Selection', () => {
       
       // Assert
       expect(result.length).toBe(shapes.length);
-      expect(result).toEqual(shapes);
+      
+      // All shapes should be deselected
+      result.forEach(shape => {
+        expect(shape.selected).toBe(false);
+      });
     });
     
     it('should handle empty shapes array', () => {

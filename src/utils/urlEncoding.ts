@@ -1,6 +1,4 @@
 import { AnyShape, Circle, Rectangle, Triangle, Line, Point } from '@/types/shapes';
-import { Formula, FormulaType } from '@/types/formula';
-import { generateFormulaId } from '@/utils/formulaUtils';
 
 /**
  * Encodes an array of shapes into a URL-friendly string
@@ -26,9 +24,9 @@ export function encodeShapesToString(shapes: AnyShape[]): string {
       shape.position.x.toFixed(1), // Reduce precision to save space
       shape.position.y.toFixed(1),
       shape.rotation.toFixed(1),
-      encodeURIComponent(shape.fillColor),
-      encodeURIComponent(shape.strokeColor),
-      shape.opacity.toFixed(1)
+      encodeURIComponent(shape.fill),
+      encodeURIComponent(shape.stroke),
+      shape.strokeWidth.toFixed(1)
     ];
     
     // Add type-specific properties
@@ -100,9 +98,9 @@ export function decodeStringToShapes(encodedString: string): AnyShape[] {
       const x = parseFloat(parts[2]);
       const y = parseFloat(parts[3]);
       const rotation = parseFloat(parts[4]);
-      const fillColor = decodeURIComponent(parts[5]);
-      const strokeColor = decodeURIComponent(parts[6]);
-      const opacity = parseFloat(parts[7]);
+      const fill = decodeURIComponent(parts[5]);
+      const stroke = decodeURIComponent(parts[6]);
+      const strokeWidth = parseFloat(parts[7]);
       
       // Common shape properties
       const commonProps = {
@@ -110,9 +108,10 @@ export function decodeStringToShapes(encodedString: string): AnyShape[] {
         type,
         position: { x, y },
         rotation,
-        fillColor,
-        strokeColor,
-        opacity
+        selected: false, // Always start unselected
+        fill,
+        stroke,
+        strokeWidth
       };
       
       // Create the specific shape type
@@ -185,106 +184,13 @@ export function decodeGridPosition(encodedPosition: string): Point | null {
 }
 
 /**
- * Encodes an array of formulas into a URL-friendly string
- * Format: formula1|formula2|formula3
- * Where each formula is encoded as: type,id,expression,color,strokeWidth,xRangeMin,xRangeMax,samples,scaleFactor
+ * Updates the URL with encoded shapes and grid position without reloading the page
  */
-export function encodeFormulasToString(formulas: Formula[]): string {
-  if (!formulas.length) return '';
-  
-  // Limit the number of formulas to encode to prevent URL from getting too long
-  const MAX_FORMULAS = 10;
-  const formulasToEncode = formulas.length > MAX_FORMULAS ? formulas.slice(0, MAX_FORMULAS) : formulas;
-  
-  if (formulas.length > MAX_FORMULAS) {
-    console.warn(`Too many formulas to encode in URL (${formulas.length}). Limiting to ${MAX_FORMULAS}.`);
-  }
-  
-  return formulasToEncode.map(formula => {
-    // Common properties for all formulas
-    const props = [
-      formula.type,
-      formula.id,
-      encodeURIComponent(formula.expression),
-      encodeURIComponent(formula.color),
-      formula.strokeWidth.toFixed(1),
-      formula.xRange[0].toFixed(0),
-      formula.xRange[1].toFixed(0),
-      formula.samples.toString(),
-      formula.scaleFactor.toFixed(2)
-    ];
-    
-    // Add type-specific properties
-    if (formula.type === 'parametric' || formula.type === 'polar') {
-      if (formula.tRange) {
-        props.push(formula.tRange[0].toFixed(0), formula.tRange[1].toFixed(0));
-      }
-    }
-    
-    // Join all properties with commas
-    return props.join(',');
-  }).join('|');
-}
-
-/**
- * Decodes a URL-friendly string into an array of formulas
- */
-export function decodeStringToFormulas(encodedString: string): Formula[] {
-  if (!encodedString) return [];
-  
-  try {
-    const formulaStrings = encodedString.split('|');
-    
-    return formulaStrings.map(formulaStr => {
-      const parts = formulaStr.split(',');
-      
-      // Extract common properties
-      const type = parts[0] as FormulaType;
-      const id = parts[1] || generateFormulaId(); // Generate a new ID if none exists
-      const expression = decodeURIComponent(parts[2]);
-      const color = decodeURIComponent(parts[3]);
-      const strokeWidth = parseFloat(parts[4]);
-      const xRangeMin = parseFloat(parts[5]);
-      const xRangeMax = parseFloat(parts[6]);
-      const samples = parseInt(parts[7], 10);
-      const scaleFactor = parseFloat(parts[8]);
-      
-      // Common formula properties
-      const commonProps: Formula = {
-        id,
-        type,
-        expression,
-        color,
-        strokeWidth,
-        xRange: [xRangeMin, xRangeMax],
-        samples,
-        scaleFactor
-      };
-      
-      // Add type-specific properties
-      if (type === 'parametric' || type === 'polar') {
-        if (parts.length >= 11) {
-          commonProps.tRange = [parseFloat(parts[9]), parseFloat(parts[10])];
-        }
-      }
-      
-      return commonProps;
-    });
-  } catch (error) {
-    console.error('Error decoding formulas from URL:', error);
-    return [];
-  }
-}
-
-/**
- * Updates the URL with encoded shapes, formulas, and grid position without reloading the page
- */
-export function updateUrlWithData(shapes: AnyShape[], formulas: Formula[], gridPosition?: Point | null): void {
+export function updateUrlWithShapes(shapes: AnyShape[], gridPosition?: Point | null): void {
   const encodedShapes = encodeShapesToString(shapes);
-  const encodedFormulas = encodeFormulasToString(formulas);
   
   console.log('Updating URL with shapes:', shapes.length, 'shapes');
-  console.log('Updating URL with formulas:', formulas.length, 'formulas');
+  console.log('Encoded shapes string length:', encodedShapes.length);
   
   // Create a new URL object based on the current URL
   const url = new URL(window.location.href);
@@ -292,25 +198,19 @@ export function updateUrlWithData(shapes: AnyShape[], formulas: Formula[], gridP
   // Set or update the 'shapes' query parameter
   if (encodedShapes) {
     // Check if the URL would be too long
-    const estimatedUrlLength = url.toString().length + encodedShapes.length + encodedFormulas.length + 20;
+    const estimatedUrlLength = url.toString().length + encodedShapes.length + 10;
     if (estimatedUrlLength > 2000) {
       console.warn(`URL would be too long (${estimatedUrlLength} chars). Limiting shapes in URL.`);
       // Try with fewer shapes
       const reducedShapes = shapes.slice(0, Math.max(1, Math.floor(shapes.length / 2)));
       const reducedEncodedShapes = encodeShapesToString(reducedShapes);
       url.searchParams.set('shapes', reducedEncodedShapes);
+      console.log(`Reduced to ${reducedShapes.length} shapes, new URL length: ${url.toString().length + reducedEncodedShapes.length + 10}`);
     } else {
       url.searchParams.set('shapes', encodedShapes);
     }
   } else {
     url.searchParams.delete('shapes');
-  }
-  
-  // Set or update the 'formulas' query parameter
-  if (encodedFormulas) {
-    url.searchParams.set('formulas', encodedFormulas);
-  } else {
-    url.searchParams.delete('formulas');
   }
   
   // Set or update the 'grid' query parameter if provided
@@ -346,22 +246,6 @@ export function getShapesFromUrl(): AnyShape[] | null {
   const shapes = decodeStringToShapes(encodedShapes);
   console.log('Decoded shapes from URL:', shapes.length, 'shapes');
   return shapes;
-}
-
-/**
- * Gets formulas from the URL if they exist
- */
-export function getFormulasFromUrl(): Formula[] | null {
-  const url = new URL(window.location.href);
-  const encodedFormulas = url.searchParams.get('formulas');
-  
-  console.log('Getting formulas from URL, encoded formulas present:', !!encodedFormulas);
-  
-  if (!encodedFormulas) return null;
-  
-  const formulas = decodeStringToFormulas(encodedFormulas);
-  console.log('Decoded formulas from URL:', formulas.length, 'formulas');
-  return formulas;
 }
 
 /**

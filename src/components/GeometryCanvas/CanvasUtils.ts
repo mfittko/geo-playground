@@ -2,31 +2,18 @@ import React from 'react';
 import { AnyShape, Circle, Rectangle, Triangle, Line, Point, MeasurementUnit } from '@/types/shapes';
 
 // Default physical measurements constants (in pixels)
-// Based on actual screen measurements: 1cm = 60px, 1mm = 6px
+// Standard 96 DPI: 1cm = 37.8px, 1mm = 3.78px, 1in = 96px
 export const DEFAULT_PIXELS_PER_CM = 60;
 export const DEFAULT_PIXELS_PER_MM = 6;
-// 1 inch = 2.54cm, so 60 * 2.54 = 152.4px per inch
 export const DEFAULT_PIXELS_PER_INCH = 152.4;
 
 // Get stored calibration values from localStorage
 export const getStoredPixelsPerUnit = (unit: MeasurementUnit): number => {
   const storedValue = localStorage.getItem(`pixelsPerUnit_${unit}`);
   if (storedValue) {
-    const value = parseFloat(storedValue);
-    console.log(`Retrieved stored value for ${unit}:`, value);
-    return value;
+    return parseFloat(storedValue);
   }
-  // Use default values if no stored value is found
-  const defaultValue = unit === 'cm' ? DEFAULT_PIXELS_PER_CM : DEFAULT_PIXELS_PER_INCH;
-  console.log(`No stored value for ${unit}, using default:`, defaultValue);
-  return defaultValue;
-};
-
-// Clear all calibration values from localStorage
-export const clearCalibrationValues = (): void => {
-  localStorage.removeItem('pixelsPerUnit_cm');
-  localStorage.removeItem('pixelsPerUnit_in');
-  console.log('Cleared all calibration values from localStorage');
+  return unit === 'cm' ? DEFAULT_PIXELS_PER_CM : DEFAULT_PIXELS_PER_INCH;
 };
 
 // Convert mouse event coordinates to canvas coordinates
@@ -104,7 +91,7 @@ export const getShapeAtPosition = (point: Point, shapes: AnyShape[]): AnyShape |
         );
         
         // Use a threshold for hit detection (make it easier to select thin lines)
-        const hitThreshold = 10; // Fixed hit threshold for all lines
+        const hitThreshold = Math.max(line.strokeWidth * 2, 10);
         
         if (distance <= hitThreshold) {
           return shape;

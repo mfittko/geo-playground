@@ -39,8 +39,6 @@ const FormulaGraph: React.FC<FormulaGraphProps> = ({
   const lastGridPositionRef = useRef<Point | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<{ index: number, point: FormulaPoint } | null>(null);
-  // Add a ref to store the last valid points
-  const lastValidPointsRef = useRef<FormulaPoint[]>([]);
   
   // Force re-evaluation when grid position changes significantly
   const gridPositionKey = useMemo(() => {
@@ -72,19 +70,6 @@ const FormulaGraph: React.FC<FormulaGraphProps> = ({
                     formula.expression === 'Math.tan(x)' || 
                     formula.expression.includes('tan(x)');
 
-  // Check if this is a logarithmic function
-  const isLogarithmic = formula.expression.includes('Math.log(') ||
-                        formula.expression.includes('Math.log10(') ||
-                        formula.expression.includes('Math.log2(') ||
-                        formula.expression.includes('log(') ||
-                        formula.expression.includes('ln(');
-
-  // Check if this is a trigonometric function
-  const hasTrigFunction = formula.expression.includes('Math.sin(') || 
-                          formula.expression.includes('Math.cos(') ||
-                          formula.expression.includes('sin(') || 
-                          formula.expression.includes('cos(');
-
   // Calculate points for the formula
   const points = useMemo(() => {
     // Set updating state to true
@@ -95,33 +80,24 @@ const FormulaGraph: React.FC<FormulaGraphProps> = ({
     // Check both our local dragging detection and the global grid dragging flag
     const draggingMode = isDraggingRef.current || isGridDragging.value;
     
+    // Use requestAnimationFrame to ensure smooth updates
+    let result: FormulaPoint[] = [];
+    
     // Use a timeout to ensure we don't block the UI thread
     const evaluateAsync = () => {
-      const result = evaluateFormula(formula, gridPosition, pixelsPerUnit, draggingMode);
-      
-      // Store the result as the last valid points if it's not empty
-      if (result.length > 0) {
-        lastValidPointsRef.current = result;
-      }
-
+      result = evaluateFormula(formula, gridPosition, pixelsPerUnit, draggingMode);
       console.log(`Generated ${result.length} points for formula (dragging: ${draggingMode})`);
       setIsUpdating(false);
     };
-
+    
     // If we're dragging, use a shorter timeout to ensure responsiveness
     if (draggingMode) {
       setTimeout(evaluateAsync, 0);
-      // Return last valid points during dragging instead of empty array
-      return lastValidPointsRef.current;
+      // Return empty points initially, they'll be updated when the evaluation completes
+      return [];
     } else {
       // If not dragging, evaluate synchronously
-      const result = evaluateFormula(formula, gridPosition, pixelsPerUnit, draggingMode);
-      
-      // Store the result as the last valid points
-      if (result.length > 0) {
-        lastValidPointsRef.current = result;
-      }
-
+      result = evaluateFormula(formula, gridPosition, pixelsPerUnit, draggingMode);
       setIsUpdating(false);
       return result;
     }
@@ -129,6 +105,7 @@ const FormulaGraph: React.FC<FormulaGraphProps> = ({
 
   // Update local selected point when global selected point changes
   useEffect(() => {
+    console.log('FormulaGraph: globalSelectedPoint changed:', globalSelectedPoint);
     console.log('FormulaGraph: current formula id:', formula.id);
     
     // If there's no global selected point or it's for a different formula, clear local selection
@@ -218,49 +195,9 @@ const FormulaGraph: React.FC<FormulaGraphProps> = ({
     
     // Function to check if a point is within the visible canvas area with some margin
     const isWithinCanvas = (x: number, y: number): boolean => {
-      // Determine appropriate margins based on function type
-      let xMargin = 1000;
-      let yMargin = 1000;
-      
-      // For logarithmic functions, use larger margins
-      if (isLogarithmic) {
-        xMargin = 20000;
-        yMargin = 50000;
-      }
-      
-      // For tangent functions, use much larger margins
-      // Tangent functions have vertical asymptotes
-      if (isTangent || 
-          formula.expression.includes('Math.tan(x)') || 
-          formula.expression.includes('tan(x)')) {
-        xMargin = 10000;
-        yMargin = 1000000; // Very large y-margin for tangent asymptotes
-      }
-      
-      // For exponential functions, use much larger margins
-      // Exponential functions grow extremely rapidly
-      if (formula.expression.includes('Math.exp(x)') || 
-          formula.expression.includes('exp(x)') ||
-          formula.expression.includes('e^x')) {
-        xMargin = 10000;
-        yMargin = 1000000; // Very large y-margin for exponential growth
-      }
-      
-      // For polynomial functions, especially higher degree ones, use larger margins
-      if (formula.expression.includes('*x*x*x') || // Cubic or higher
-          formula.expression.includes('x^3') || 
-          formula.expression.includes('x**3')) {
-        xMargin = 5000;
-        yMargin = 100000; // Much larger y-margin for higher degree polynomials
-      } else if (formula.expression.includes('*x*x') || // Quadratic
-                formula.expression.includes('x^2') || 
-                formula.expression.includes('x**2')) {
-        xMargin = 3000;
-        yMargin = 50000;
-      }
-      
-      return x >= -xMargin && x <= canvasWidth + xMargin && 
-             y >= -yMargin && y <= canvasHeight + yMargin;
+      const margin = 1000; // Allow points slightly outside the visible area
+      return x >= -margin && x <= canvasWidth + margin && 
+             y >= -margin && y <= canvasHeight + margin;
     };
 
     // Function to detect large jumps in y values that indicate discontinuities
@@ -268,183 +205,37 @@ const FormulaGraph: React.FC<FormulaGraphProps> = ({
       if (!p1.isValid || !p2.isValid) return true;
       
       // Check for large vertical jumps that indicate discontinuities
-      // Use different thresholds based on function type
-      let MAX_JUMP = 100; // Default
-      
-      // For exponential functions, use a much higher threshold
-      if (formula.expression.includes('Math.exp(x)') || 
-          formula.expression.includes('exp(x)') ||
-          formula.expression.includes('e^x')) {
-        MAX_JUMP = 10000; // Exponential functions can have very large jumps
-      }
-      
-      // For polynomial functions, use a higher threshold
-      if (formula.expression.includes('*x*x') || 
-          formula.expression.includes('x^') || 
-          formula.expression.includes('x**')) {
-        MAX_JUMP = 500;
-      }
-      
-      // For tangent functions, use a much higher threshold
-      if (isTangent || 
-          formula.expression.includes('Math.tan(x)') || 
-          formula.expression.includes('tan(x)')) {
-        MAX_JUMP = 50000; // Tangent functions have vertical asymptotes
-        
-        // Special handling for tangent asymptotes
-        // Check if the points are on opposite sides of an asymptote
-        // For tan(x), asymptotes occur at x = (n + 0.5) * π
-        const x1 = (p1.x - gridPosition.x) / pixelsPerUnit;
-        const x2 = (p2.x - gridPosition.x) / pixelsPerUnit;
-        
-        // Check if there's a potential asymptote between x1 and x2
-        // For tan(x), asymptotes are at x = (n + 0.5) * π
-        const PI = Math.PI;
-        const checkForAsymptote = (x1: number, x2: number): boolean => {
-          // For tangent functions, we need to check if there's an asymptote between x1 and x2
-          // Asymptotes occur at x = (n + 0.5) * π, where n is an integer
-          
-          // Make sure x1 < x2
-          if (x1 > x2) {
-            const temp = x1;
-            x1 = x2;
-            x2 = temp;
-          }
-          
-          // More precise asymptote detection
-          // Calculate the exact positions of asymptotes
-          // Asymptotes occur at x = (n + 0.5) * π
-          
-          // Find the range of n values that could have asymptotes between x1 and x2
-          const n1 = Math.floor(x1 / PI - 0.5);
-          const n2 = Math.ceil(x2 / PI - 0.5);
-          
-          // Check each potential asymptote in the range
-          for (let n = n1; n <= n2; n++) {
-            const asymptote = (n + 0.5) * PI;
-            if (asymptote > x1 && asymptote < x2) {
-              return true; // Found an asymptote between the points
-            }
-          }
-          
-          // Additional check for points that are very close to asymptotes
-          // This helps catch cases where numerical precision issues might miss an asymptote
-          const distToAsymptote1 = Math.abs((x1 / PI - 0.5) % 1 - 0.5) * PI;
-          const distToAsymptote2 = Math.abs((x2 / PI - 0.5) % 1 - 0.5) * PI;
-          
-          // If either point is very close to an asymptote (within 0.01 radians)
-          // and they're on opposite sides, consider it a discontinuity
-          if ((distToAsymptote1 < 0.01 || distToAsymptote2 < 0.01) && 
-              Math.sign(Math.tan(x1)) !== Math.sign(Math.tan(x2))) {
-            return true;
-          }
-          
-          return false;
-        };
-        
-        // If the points are likely on opposite sides of an asymptote, consider it a discontinuity
-        if (checkForAsymptote(x1, x2)) {
-          return true;
-        }
-        
-        // Additional check: if the y-values have opposite signs and are both large,
-        // it's likely an asymptote crossing
-        const y1 = (gridPosition.y - p1.y) / pixelsPerUnit; // Convert to math coordinates
-        const y2 = (gridPosition.y - p2.y) / pixelsPerUnit;
-        
-        // More robust check for asymptote crossing based on y-values
-        // If both y-values are large in magnitude but have opposite signs,
-        // and the x-values are close, it's very likely an asymptote
-        if (Math.abs(y1) > 5 && Math.abs(y2) > 5 && 
-            Math.sign(y1) !== Math.sign(y2) && 
-            Math.abs(x2 - x1) < PI / 4) {
-          return true;
-        }
-        
-        // Another check: if the slope between points is extremely steep,
-        // it's likely near an asymptote
-        const slope = Math.abs((y2 - y1) / (x2 - x1));
-        if (slope > 100) {
-          return true;
-        }
-      }
-      
-      // Calculate the vertical distance between points
-      const dy = Math.abs(p2.y - p1.y);
-      
-      // Calculate the horizontal distance between points
-      const dx = Math.abs(p2.x - p1.x);
-      
-      // If the points are very close horizontally but far apart vertically,
-      // it's likely a discontinuity
-      return dy > MAX_JUMP && dx < 50;
+      const MAX_JUMP = isTangent ? 50 : 100; // Stricter for tangent functions
+      return Math.abs(p2.y - p1.y) > MAX_JUMP;
     };
 
     // First pass: process points and handle discontinuities
     let i = 0;
-    
-    // Special handling for tangent functions to ensure proper asymptote rendering
-    if (isTangent || 
-        formula.expression.includes('Math.tan(x)') || 
-        formula.expression.includes('tan(x)')) {
+    while (i < points.length) {
+      const point = points[i];
+      const withinCanvas = isWithinCanvas(point.x, point.y);
       
-      // For tangent functions, we need to be more careful about discontinuities
-      // We'll process points in segments between asymptotes
-      
-      while (i < points.length) {
-        const point = points[i];
-        const withinCanvas = isWithinCanvas(point.x, point.y);
-        
-        if (point.isValid && withinCanvas) {
-          // Check for discontinuity with previous point
-          if (i > 0 && isDiscontinuity(points[i-1], point)) {
-            // End the current path segment at asymptote
-            penDown = false;
-          }
-          
-          if (!penDown) {
-            // Start a new subpath
-            path += ` M ${point.x},${point.y}`;
-            penDown = true;
-          } else {
-            // Continue the path
-            path += ` L ${point.x},${point.y}`;
-          }
-        } else {
-          // Invalid point or outside canvas, lift the pen
+      if (point.isValid && withinCanvas) {
+        // Check for discontinuity with previous point
+        if (i > 0 && isDiscontinuity(points[i-1], point)) {
+          // End the current path segment
           penDown = false;
         }
         
-        i++;
-      }
-    } else {
-      // Standard handling for non-tangent functions
-      while (i < points.length) {
-        const point = points[i];
-        const withinCanvas = isWithinCanvas(point.x, point.y);
-        
-        if (point.isValid && withinCanvas) {
-          // Check for discontinuity with previous point
-          if (i > 0 && isDiscontinuity(points[i-1], point)) {
-            // End the current path segment
-            penDown = false;
-          }
-          
-          if (!penDown) {
-            // Start a new subpath
-            path += ` M ${point.x},${point.y}`;
-            penDown = true;
-          } else {
-            // Continue the path
-            path += ` L ${point.x},${point.y}`;
-          }
+        if (!penDown) {
+          // Start a new subpath
+          path += ` M ${point.x},${point.y}`;
+          penDown = true;
         } else {
-          // Invalid point or outside canvas, lift the pen
-          penDown = false;
+          // Continue the path
+          path += ` L ${point.x},${point.y}`;
         }
-        
-        i++;
+      } else {
+        // Invalid point or outside canvas, lift the pen
+        penDown = false;
       }
+      
+      i++;
     }
 
     return path;

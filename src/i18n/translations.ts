@@ -28,8 +28,7 @@ export const translations = {
       trigonometric: "Trigonometric",
       exponential: "Exponential",
       parametric: "Parametric Curves",
-      special: "Special Curves",
-      polynomial: "Polynomial Functions"
+      special: "Special Curves"
     },
     formulaPlotter: "Formula Plotter",
     openFormulaTool: "Open Formula Plotter",
@@ -58,13 +57,7 @@ export const translations = {
     parametricPointInfo: "Parametric function (t value not available)",
     polarPointInfo: "Polar function (θ value not available)",
     pointInfoTitle: "Point Information",
-    clickOnCurveInstruction: "Click on the curve to select a point and view its information.",
-    gridZoom: 'Grid Zoom',
-    gridZoomHint: 'Adjust the zoom level of the grid',
-    zoomIn: 'Zoom In',
-    zoomOut: 'Zoom Out',
-    zoomLevel: 'Zoom Level',
-    zoomReset: 'Reset Zoom',
+    clickOnCurveInstruction: "Click on the curve to select a point and view its information."
   },
   es: {
     formulaEditor: "Trazador de Fórmulas",
@@ -95,8 +88,7 @@ export const translations = {
       trigonometric: "Trigonométricas",
       exponential: "Exponenciales",
       parametric: "Curvas Paramétricas",
-      special: "Curvas Especiales",
-      polynomial: "Funciones Polinómicas"
+      special: "Curvas Especiales"
     },
     formulaPlotter: "Trazador de Fórmulas",
     openFormulaTool: "Abrir Trazador de Fórmulas",
@@ -125,13 +117,7 @@ export const translations = {
     parametricPointInfo: "Función paramétrica (valor t no disponible)",
     polarPointInfo: "Función polar (valor θ no disponible)",
     pointInfoTitle: "Información del Punto",
-    clickOnCurveInstruction: "Haz clic en la curva para seleccionar un punto y ver su información.",
-    gridZoom: 'Zoom del Gird',
-    gridZoomHint: 'Ajustar el nivel de zoom del grid',
-    zoomIn: 'Acercar',
-    zoomOut: 'Alejar',
-    zoomLevel: 'Nivel de Zoom',
-    zoomReset: 'Resetear Zoom',
+    clickOnCurveInstruction: "Haz clic en la curva para seleccionar un punto y ver su información."
   },
   fr: {
     formulaEditor: "Traceur de Formules",
@@ -162,8 +148,7 @@ export const translations = {
       trigonometric: "Trigonométriques",
       exponential: "Exponentielles",
       parametric: "Courbes Paramétriques",
-      special: "Courbes Spéciales",
-      polynomial: "Fonctions Polynomiales"
+      special: "Courbes Spéciales"
     },
     formulaPlotter: "Traceur de Formules",
     openFormulaTool: "Ouvrir le Traceur de Formules",
@@ -192,56 +177,7 @@ export const translations = {
     parametricPointInfo: "Fonction paramétrique (valeur t non disponible)",
     polarPointInfo: "Fonction polaire (valeur θ non disponible)",
     pointInfoTitle: "Information du Point",
-    clickOnCurveInstruction: "Cliquez sur la courbe pour sélectionner un point et afficher ses informations.",
-    naturalLanguageProcessing: "Traitement en cours...",
-    naturalLanguageDescription: "Utilisez un langage naturel ou du pseudocode pour décrire la fonction que vous souhaitez créer. OpenAI la convertira en une expression mathématique.",
-    configModal: {
-      title: "Configuration",
-      description: "Paramètres globaux de l'application",
-      tabs: {
-        general: "Général",
-        openai: "OpenAI",
-        developer: "Développeur"
-      },
-      general: {
-        description: "Paramètres généraux de l'application",
-        languageLabel: "Langue",
-        languagePlaceholder: "Sélectionnez une langue"
-      },
-      openai: {
-        description: "Paramètres de l'API OpenAI",
-        apiKeyLabel: "Clé API",
-        apiKeyPlaceholder: "Entrez votre clé API OpenAI",
-        apiKeyHint: "Votre clé API est stockée localement et chiffrée",
-        clearApiKey: "Effacer la clé API"
-      },
-      developer: {
-        description: "Options de développement",
-        loggingLabel: "Niveau de journalisation",
-        loggingDescription: "Définir le niveau de détail des journaux"
-      },
-      calibration: {
-        title: "Calibration",
-        description: "Calibrez l'écran pour des mesures précises",
-        instructions: "Pour calibrer, mesurez une distance connue sur votre écran",
-        lengthLabel: "Longueur de référence",
-        startButton: "Commencer la calibration",
-        placeRuler: "Placez une règle sur votre écran",
-        lineDescription: "Ajustez la ligne pour qu'elle mesure exactement {length} {unit}",
-        coarseAdjustment: "Ajustement grossier",
-        fineAdjustment: "Ajustement fin",
-        currentValue: "Valeur actuelle",
-        pixelsPerUnit: "pixels/{unit}",
-        cancelButton: "Annuler",
-        applyButton: "Appliquer"
-      }
-    },
-    gridZoom: 'Zoom du Gird',
-    gridZoomHint: 'Ajuster le niveau de zoom du grid',
-    zoomIn: 'Acercar',
-    zoomOut: 'Alejar',
-    zoomLevel: 'Niveau de Zoom',
-    zoomReset: 'Resetear Zoom',
+    clickOnCurveInstruction: "Cliquez sur la courbe pour sélectionner un point et afficher ses informations."
   },
   de: {
     formulaEditor: "Formelplotter",
@@ -272,8 +208,7 @@ export const translations = {
       trigonometric: "Trigonometrische",
       exponential: "Exponentielle",
       parametric: "Parametrische Kurven",
-      special: "Spezielle Kurven",
-      polynomial: "Polynomfunktionen"
+      special: "Spezielle Kurven"
     },
     formulaPlotter: "Formelplotter",
     openFormulaTool: "Formelplotter öffnen",
@@ -302,12 +237,6 @@ export const translations = {
     parametricPointInfo: "Parametrische Funktion (t-Wert nicht verfügbar)",
     polarPointInfo: "Polarfunktion (θ-Wert nicht verfügbar)",
     pointInfoTitle: "Punktinformation",
-    clickOnCurveInstruction: "Klicken Sie auf die Kurve, um einen Punkt auszuwählen und seine Informationen anzuzeigen.",
-    gridZoom: 'Gitter-Zoom',
-    gridZoomHint: 'Passen Sie die Zoomstufe des Gitters an',
-    zoomIn: 'Vergrößern',
-    zoomOut: 'Verkleinern',
-    zoomLevel: 'Zoomstufe',
-    zoomReset: 'Zoom zurücksetzen',
+    clickOnCurveInstruction: "Klicken Sie auf die Kurve, um einen Punkt auszuwählen und seine Informationen anzuzeigen."
   }
 };

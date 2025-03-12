@@ -36,9 +36,10 @@ describe('Shape Operations - Creation', () => {
         position: startPoint,
         radius: expectedRadius,
         rotation: 0,
-        fillColor: expect.any(String),
-        strokeColor: expect.any(String),
-        opacity: expect.any(Number)
+        selected: true,
+        fill: expect.any(String),
+        stroke: expect.any(String),
+        strokeWidth: expect.any(Number)
       });
     });
     
@@ -59,9 +60,10 @@ describe('Shape Operations - Creation', () => {
         width: 100, // |200 - 100|
         height: 50, // |150 - 100|
         rotation: 0,
-        fillColor: expect.any(String),
-        strokeColor: expect.any(String),
-        opacity: expect.any(Number)
+        selected: true,
+        fill: expect.any(String),
+        stroke: expect.any(String),
+        strokeWidth: expect.any(Number)
       });
     });
     
@@ -82,9 +84,10 @@ describe('Shape Operations - Creation', () => {
         width: 100, // |200 - 100|
         height: 100, // |200 - 100|
         rotation: 0,
-        fillColor: expect.any(String),
-        strokeColor: expect.any(String),
-        opacity: expect.any(Number)
+        selected: true,
+        fill: expect.any(String),
+        stroke: expect.any(String),
+        strokeWidth: expect.any(Number)
       });
     });
     
@@ -104,9 +107,10 @@ describe('Shape Operations - Creation', () => {
         position: expect.any(Object), // Position is calculated as center of triangle
         points: expect.any(Array), // Points are calculated based on start and end
         rotation: 0,
-        fillColor: expect.any(String),
-        strokeColor: expect.any(String),
-        opacity: expect.any(Number)
+        selected: true,
+        fill: expect.any(String),
+        stroke: expect.any(String),
+        strokeWidth: expect.any(Number)
       });
       
       // Check that we have 3 points
@@ -137,9 +141,10 @@ describe('Shape Operations - Creation', () => {
         endPoint: endPoint,
         length: expectedLength,
         rotation: 0,
-        fillColor: expect.any(String),
-        strokeColor: expect.any(String),
-        opacity: expect.any(Number)
+        selected: true,
+        fill: expect.any(String),
+        stroke: expect.any(String),
+        strokeWidth: expect.any(Number)
       });
     });
     

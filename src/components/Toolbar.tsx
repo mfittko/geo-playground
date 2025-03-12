@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -9,7 +10,6 @@ import type { ShapeType, OperationMode } from '@/types/shapes';
 import { useTranslate } from '@/utils/translate';
 import { useConfig } from '@/context/ConfigContext';
 import { getFormula } from '@/utils/geometryUtils';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ToolbarProps {
   activeMode: OperationMode;
@@ -38,90 +38,73 @@ const Toolbar: React.FC<ToolbarProps> = ({
 }) => {
   const t = useTranslate();
   const { language } = useConfig();
-  const isMobile = useIsMobile();
   
   return (
-    <div id="geometry-toolbar" className="flex items-center space-x-1 p-1 bg-white rounded-lg shadow-sm border border-gray-200 animate-fade-in">
+    <div className="flex items-center space-x-1 p-1 bg-white rounded-lg shadow-sm border border-gray-200 animate-fade-in">
       <ToolButton 
-        id="select-tool"
         active={activeMode === 'select'}
         onClick={() => onModeChange('select')}
         tooltip={t('tooltips.select')}
-        formulaExplanation={t('tooltips.moveDescription')}
       >
-        <MousePointer className="h-3 w-3 sm:h-4 sm:w-4" />
+        <MousePointer size={18} />
       </ToolButton>
       
-      <Separator orientation="vertical" className="h-6 sm:h-8 mx-0.5 sm:mx-1" />
+      <Separator orientation="vertical" className="h-8 mx-1" />
       
       <ToolButton 
-        id="rectangle-tool"
         active={activeMode === 'create' && activeShapeType === 'rectangle'}
         onClick={() => {
           onModeChange('create');
           onShapeTypeChange('rectangle');
         }}
-        tooltip={t('shapeNames.rectangle')}
+        tooltip={t('tooltips.rectangle')}
         formula={getFormula('rectangle', 'area', language)}
         formulaExplanation={t('formulaExplanations.rectangle.area')}
       >
-        <Square className="h-3 w-3 sm:h-4 sm:w-4" />
+        <Square size={18} />
       </ToolButton>
       
       <ToolButton 
-        id="circle-tool"
         active={activeMode === 'create' && activeShapeType === 'circle'}
         onClick={() => {
           onModeChange('create');
           onShapeTypeChange('circle');
         }}
-        tooltip={t('shapeNames.circle')}
+        tooltip={t('tooltips.circle')}
         formula={getFormula('circle', 'area', language)}
         formulaExplanation={t('formulaExplanations.circle.area')}
       >
-        <Circle className="h-3 w-3 sm:h-4 sm:w-4" />
+        <Circle size={18} />
       </ToolButton>
       
       <ToolButton 
-        id="triangle-tool"
         active={activeMode === 'create' && activeShapeType === 'triangle'}
         onClick={() => {
           onModeChange('create');
           onShapeTypeChange('triangle');
         }}
-        tooltip={t('shapeNames.triangle')}
+        tooltip={t('tooltips.triangle')}
         formula={getFormula('triangle', 'area', language)}
         formulaExplanation={t('formulaExplanations.triangle.area')}
       >
-        <Triangle className="h-3 w-3 sm:h-4 sm:w-4" />
+        <Triangle size={18} />
       </ToolButton>
       
       <ToolButton 
-        id="line-tool"
         active={activeMode === 'create' && activeShapeType === 'line'}
         onClick={() => {
           onModeChange('create');
           onShapeTypeChange('line');
         }}
-        tooltip={t('shapeNames.line')}
+        tooltip={t('tooltips.line')}
         formula="d = \\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}"
-        formulaExplanation={t('formulaExplanations.line.length')}
+        formulaExplanation={t('tooltips.lineExplanation') || "Calculates the straight-line distance between two points"}
       >
-        <Ruler className="h-3 w-3 sm:h-4 sm:w-4" />
+        <Ruler size={18} />
       </ToolButton>
       
-      <ToolButton 
-        active={activeMode === 'rotate'}
-        onClick={() => onModeChange('rotate')}
-        disabled={!hasSelectedShape}
-        tooltip={t('tooltips.rotate')}
-        formulaExplanation={t('tooltips.rotateDescription')}
-      >
-        <RotateCw className="h-3 w-3 sm:h-4 sm:w-4" />
-      </ToolButton>
-
-      <Separator orientation="vertical" className="h-6 sm:h-8 mx-0.5 sm:mx-1" />
-
+      <Separator orientation="vertical" className="h-8 mx-1" />
+      
       {onToggleFormulaEditor && (
         <>
           <ToolButton 
@@ -130,10 +113,32 @@ const Toolbar: React.FC<ToolbarProps> = ({
             tooltip={t('tooltips.plot')}
             formulaExplanation={t('tooltips.plotDescription')}
           >
-            <FunctionSquare className="h-3 w-3 sm:h-4 sm:w-4" />
+            <FunctionSquare size={18} />
           </ToolButton>
+          
+          <Separator orientation="vertical" className="h-8 mx-1" />
         </>
       )}
+      
+      <ToolButton 
+        active={activeMode === 'rotate'}
+        onClick={() => onModeChange('rotate')}
+        disabled={!hasSelectedShape}
+        tooltip={t('tooltips.rotate')}
+      >
+        <RotateCw size={18} />
+      </ToolButton>
+      
+      <Separator orientation="vertical" className="h-8 mx-1" />
+      
+      <ToolButton 
+        onClick={onDelete}
+        disabled={!canDelete}
+        tooltip={t('tooltips.delete')}
+        variant="destructive"
+      >
+        <Trash size={18} />
+      </ToolButton>
     </div>
   );
 };
@@ -147,7 +152,6 @@ interface ToolButtonProps {
   formula?: string;
   formulaExplanation?: string;
   variant?: 'default' | 'destructive';
-  id?: string;
 }
 
 const ToolButton: React.FC<ToolButtonProps> = ({
@@ -158,64 +162,41 @@ const ToolButton: React.FC<ToolButtonProps> = ({
   tooltip,
   formula,
   formulaExplanation,
-  variant = 'default',
-  id
+  variant = 'default'
 }) => {
   const t = useTranslate();
-  const isMobile = useIsMobile();
-  
-  // Determine the button variant based on active state and provided variant
-  const buttonVariant = active 
-    ? 'default' 
-    : variant === 'destructive' 
-      ? 'destructive' 
-      : 'outline';
-  
-  // For mobile, we don't use tooltips
-  if (isMobile) {
-    return (
-      <Button
-        id={id}
-        variant={buttonVariant}
-        size="icon"
-        className={`h-7 w-7 sm:h-8 sm:w-8 ${active ? 'bg-primary text-primary-foreground' : ''}`}
-        onClick={onClick}
-        disabled={disabled}
-        aria-label={tooltip}
-      >
-        {children}
-      </Button>
-    );
-  }
   
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            id={id}
-            variant={buttonVariant}
+            variant={variant === 'destructive' ? 'destructive' : active ? 'default' : 'outline'}
             size="icon"
-            className={`h-7 w-7 sm:h-8 sm:w-8 ${active ? 'bg-primary text-primary-foreground' : ''}`}
             onClick={onClick}
             disabled={disabled}
-            aria-label={tooltip}
+            className={`h-9 w-9 transition-all ${active ? 'bg-geometry-primary text-white' : ''} 
+              ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {children}
           </Button>
         </TooltipTrigger>
-        <TooltipContent side="bottom" align="center" className="max-w-xs">
-          <div className="space-y-1">
-            <p className="font-medium">{tooltip}</p>
-            {formula && (
-              <div className="text-xs bg-muted p-1 rounded">
+        <TooltipContent side="bottom" align="center" className={formula ? "max-w-xs p-4" : ""}>
+          {formula ? (
+            <div className="space-y-2">
+              <p className="text-xs font-medium">{tooltip}</p>
+              <div className="katex-formula pt-1">
                 <InlineMath math={formula} />
               </div>
-            )}
-            {formulaExplanation && (
-              <p className="text-xs text-muted-foreground">{formulaExplanation}</p>
-            )}
-          </div>
+              {formulaExplanation && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {formulaExplanation}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs">{tooltip}</p>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

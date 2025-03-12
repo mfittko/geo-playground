@@ -1,33 +1,82 @@
-import React from 'react';
+import React, { useState } from 'react';
+import LanguageSelector from './LanguageSelector';
 import { useTranslate } from '@/utils/translate';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from './ui/button';
+import { Maximize2, Minimize2, Share2 } from 'lucide-react';
+import { useShapeOperations } from '@/hooks/useShapeOperations';
 
 interface GeometryHeaderProps {
   isFullscreen: boolean;
-  className?: string;
 }
 
-const GeometryHeader: React.FC<GeometryHeaderProps> = ({ isFullscreen, className = '' }) => {
+const GeometryHeader: React.FC<GeometryHeaderProps> = ({ isFullscreen }) => {
   const t = useTranslate();
-  const isMobile = useIsMobile();
+  const [isFullscreenState, setIsFullscreenState] = useState(isFullscreen);
+  const { shareCanvasUrl, shapes } = useShapeOperations();
 
-  // If on mobile, don't render the header
-  if (isMobile) {
-    return null;
-  }
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        setIsFullscreenState(true);
+      }).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          setIsFullscreenState(false);
+        }).catch(err => {
+          console.error(`Error attempting to exit fullscreen: ${err.message}`);
+        });
+      }
+    }
+  };
 
-  // Don't render in fullscreen mode
-  if (isFullscreen) {
-    return null;
-  }
+  // Listen for fullscreen change events (e.g., when user presses Esc)
+  React.useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreenState(!!document.fullscreenElement);
+    };
 
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+  
   return (
-    <header className={`flex items-center justify-between p-0.5 sm:p-1 md:p-2 lg:p-4 ${className}`}>
-      <div className="flex items-center space-x-1 sm:space-x-2 ml-1 sm:ml-0">
-        <h1 className="text-base sm:text-lg md:text-xl font-bold">{t('appTitle')}</h1>
-        <p className="hidden md:block text-xs sm:text-sm text-muted-foreground">{t('appDescription')}</p>
+    <div className={`flex flex-col ${isFullscreenState ? 'space-y-0 mb-1' : 'space-y-1 mb-6'} animate-fade-in`}>
+      <div className="flex justify-between items-center">
+        <h1 className={`${isFullscreenState ? 'text-xl' : 'text-3xl'} font-bold tracking-tight transition-all`}>
+          {t('appTitle')}
+        </h1>
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={shareCanvasUrl}
+            title={t('shareCanvas')}
+            disabled={shapes.length === 0}
+          >
+            <Share2 size={18} />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={toggleFullscreen}
+            title={isFullscreenState ? t('exitFullscreen') : t('enterFullscreen')}
+          >
+            {isFullscreenState ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          </Button>
+          <LanguageSelector />
+        </div>
       </div>
-    </header>
+      {!isFullscreenState && (
+        <p className="text-sm text-muted-foreground">
+          {t('appDescription')}
+        </p>
+      )}
+    </div>
   );
 };
 
